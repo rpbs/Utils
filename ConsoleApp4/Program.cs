@@ -11,39 +11,38 @@ string authors =  File.ReadAllText("test.txt");
 // Get all matches  
 MatchCollection matchedAuthors = rg.Matches(authors);
 
-int found = 0;
-
 var body = matchedAuthors[0].Value.Replace("\r", "").Replace("\n", "");
 
-NewMethod(ref body, ref found);
+NewMethod(ref body);
 
-Console.WriteLine(body.TrimStart().TrimEnd());
+var trimed = body.TrimStart().TrimEnd(); 
 
-static void NewMethod(ref string bodyMatch, ref int found)
+Console.WriteLine(trimed);
+
+static void NewMethod(ref string bodyMatch)
 {
     if (bodyMatch is not null)
     {
         foreach (var tag in HtmlTags.Tags)
         {
-            var rg = new Regex($"<{tag}\\s.+?\">");
-            if (rg.IsMatch(bodyMatch))
-            {
-                bodyMatch = rg.Replace(bodyMatch, "");
-                found++;
-            }
-            rg = new Regex($"<{tag}>");
-            if (rg.IsMatch(bodyMatch))
-            {
-                bodyMatch = rg.Replace(bodyMatch, "");
-                found++;
-            }
-            rg = new Regex(@$"</{tag}>");
-            if (rg.IsMatch(bodyMatch))
-            {
-                bodyMatch = rg.Replace(bodyMatch, "");
-                found++;
-            }
+            var rgTagWithProperties = new Regex($"<{tag}\\s.+?\">");
+            var rgTagNormal = new Regex($"<{tag}>");
+            var rgTagClosing = new Regex(@$"</{tag}>"); 
+            
+            if (rgTagWithProperties.IsMatch(bodyMatch))
+                bodyMatch = rgTagWithProperties.Replace(bodyMatch, "");
+
+            if (rgTagNormal.IsMatch(bodyMatch))
+                bodyMatch = rgTagNormal.Replace(bodyMatch, "");
+
+            if (rgTagClosing.IsMatch(bodyMatch))            
+                bodyMatch = rgTagClosing.Replace(bodyMatch, "");
         }
+        bodyMatch = bodyMatch.TrimStart().TrimEnd();
+
+        var rgRemoveExtraWhiteSpaces = new Regex(@"(\s{2,})");
+        if (rgRemoveExtraWhiteSpaces.IsMatch(bodyMatch))
+            bodyMatch = rgRemoveExtraWhiteSpaces.Replace(bodyMatch, " ");
     }
 }
 
