@@ -2,12 +2,16 @@
 using ConsoleApp4;
 using System.Text.RegularExpressions;
 
+
+
 string pattern = @"<body(>|.*)>((.|\n)*)</body>";
 // Create a Regex  
 Regex rg = new(pattern);
 
 // Long string  
 string authors =  File.ReadAllText("test.txt");
+
+authors = authors.Replace("3D", "");
 // Get all matches  
 MatchCollection matchedAuthors = rg.Matches(authors);
 
