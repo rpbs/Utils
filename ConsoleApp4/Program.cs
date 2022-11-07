@@ -27,8 +27,8 @@ static void NewMethod(ref string bodyMatch)
         {
             var rgTagWithProperties = new Regex($"<{tag}\\s.+?\">");
             var rgTagNormal = new Regex($"<{tag}>");
-            var rgTagClosing = new Regex(@$"</{tag}>"); 
-            
+            var rgTagClosing = new Regex(@$"</{tag}>");
+
             if (rgTagWithProperties.IsMatch(bodyMatch))
                 bodyMatch = rgTagWithProperties.Replace(bodyMatch, "");
 
@@ -37,6 +37,17 @@ static void NewMethod(ref string bodyMatch)
 
             if (rgTagClosing.IsMatch(bodyMatch))            
                 bodyMatch = rgTagClosing.Replace(bodyMatch, "");
+
+            var rgCommentOpen = new Regex(@$"<{tag}");
+            var rgCommentClose = new Regex(@$"{tag}>");
+
+            if (rgCommentOpen.IsMatch(bodyMatch))
+                bodyMatch = rgCommentOpen.Replace(bodyMatch, "");
+
+            if (rgCommentClose.IsMatch(bodyMatch))
+                bodyMatch = rgCommentClose.Replace(bodyMatch, "");
+
+
         }
         bodyMatch = bodyMatch.TrimStart().TrimEnd();
 
