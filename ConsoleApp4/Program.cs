@@ -2,89 +2,58 @@
 using ConsoleApp4;
 using System.Text.RegularExpressions;
 
-string html = File.ReadAllText("test1.txt");
+string html = File.ReadAllText("test.txt");
 
-html = html.Replace("'", "\"");
+html = html.Replace("'", "\"")
+    .Replace("3D","")
+    .Replace("\r", "")
+    .Replace("\n", "")
+    .Replace(">=20",">");
 
-string patternLowerCase = @"<body(>|.*)>((.|\n)*)</body>";
 
-string patternUpperCase = @"<BODY(>|.*)>((.|\n)*)</BODY>";
+NewMethod(ref html);
 
-var body = "";
+var trimed = html.TrimStart().TrimEnd(); 
 
-Regex rg = new(patternLowerCase);
-
-if (rg.IsMatch(html))
-{
-    var matchedAuthors = rg.Matches(html);
-    body = matchedAuthors[0].Value.Replace("\r", "").Replace("\n", "");
-}
-
-rg = new(patternUpperCase);
-
-if (rg.IsMatch(html))
-{
-    var matchedAuthors = rg.Matches(html);
-    body = matchedAuthors[0].Value.Replace("\r", "").Replace("\n", "");
-}
-
-NewMethod(ref body);
-
-var trimed = body.TrimStart().TrimEnd(); 
-
-Console.WriteLine(trimed);
+//Console.WriteLine(trimed);
 
 static void NewMethod(ref string bodyMatch)
 {
+    var matches = new List<MatchCollection>();
     if (bodyMatch is not null)
     {
-        foreach (var tag in HtmlTags.Tags)
+        foreach (var tag in HtmlTags.ContainerTags)
         {
-            var rgTagWithProperties = new Regex($"<{tag}\\s.+?\">");
-            var rgTagNormal = new Regex($"<{tag}>");
-            var rgTagClosing = new Regex(@$"</{tag}>");
+            // <p\s.+?\">.+?<\/p>
+            var pattern = "$@"<{tag}\s.+?\">.+?<\/{tag}>";
+            var rgTagWithProperties = new Regex();
+            var rgTagNormal = new Regex($"<{tag}>.+?<//{tag}>");
 
             if (rgTagWithProperties.IsMatch(bodyMatch))
-                bodyMatch = rgTagWithProperties.Replace(bodyMatch, "");
+                matches.Add(rgTagWithProperties.Matches(bodyMatch));
 
             if (rgTagNormal.IsMatch(bodyMatch))
-                bodyMatch = rgTagNormal.Replace(bodyMatch, "");
+                matches.Add(rgTagNormal.Matches(bodyMatch));
 
-            if (rgTagClosing.IsMatch(bodyMatch))            
-                bodyMatch = rgTagClosing.Replace(bodyMatch, "");
-
-            var rgCommentOpen = new Regex(@$"<!--");
-            var rgCommentClose = new Regex(@$"-->");
-
-            if (rgCommentOpen.IsMatch(bodyMatch))
-                bodyMatch = rgCommentOpen.Replace(bodyMatch, "");
-
-            if (rgCommentClose.IsMatch(bodyMatch))
-                bodyMatch = rgCommentClose.Replace(bodyMatch, "");
         }
         foreach (var tag in HtmlTags.Tags.Select(x => x.ToUpper()))
         {
-            var rgTagWithProperties = new Regex($"<{tag}\\s.+?\">");
-            var rgTagNormal = new Regex($"<{tag}>");
-            var rgTagClosing = new Regex(@$"</{tag}>");
+            var rgTagWithProperties = new Regex($"<{tag}\\s.+?\"><//{tag}>");
+            var rgTagNormal = new Regex($"<{tag}><//{tag}>");
 
             if (rgTagWithProperties.IsMatch(bodyMatch))
-                bodyMatch = rgTagWithProperties.Replace(bodyMatch, "");
+                matches.Add(rgTagWithProperties.Matches(bodyMatch));
 
             if (rgTagNormal.IsMatch(bodyMatch))
-                bodyMatch = rgTagNormal.Replace(bodyMatch, "");
+                matches.Add(rgTagNormal.Matches(bodyMatch));
+        }
 
-            if (rgTagClosing.IsMatch(bodyMatch))
-                bodyMatch = rgTagClosing.Replace(bodyMatch, "");
-
-            var rgCommentOpen = new Regex(@$"<{tag}");
-            var rgCommentClose = new Regex(@$"{tag}>");
-
-            if (rgCommentOpen.IsMatch(bodyMatch))
-                bodyMatch = rgCommentOpen.Replace(bodyMatch, "");
-
-            if (rgCommentClose.IsMatch(bodyMatch))
-                bodyMatch = rgCommentClose.Replace(bodyMatch, "");
+        foreach (var match in matches)
+        {
+            foreach (var values in match)
+            {
+                Console.WriteLine(values);
+            }
         }
 
         bodyMatch = bodyMatch.TrimStart().TrimEnd();

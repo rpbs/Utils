@@ -1,6 +1,29 @@
 ﻿namespace ConsoleApp4;
     internal class HtmlTags
     {
+
+    public static string[] ContainerTags { get; } = {
+            "p",
+            "div",
+            "span",
+            "em",
+            "strong",
+            "b",
+            "i",
+            "a",
+            "ol",
+            "ul",
+            "li",
+            "td",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+        };
+    
+
         public static string[] Tags { get; } = {
             "body",
             "p",
@@ -27,9 +50,12 @@
             "button",
             "canvas",
             "caption",
+            "h5",
+            "h4",
             "h3",
             "h1",
             "h2",
+            "b",
             "cite",
             "code",
             "col",
