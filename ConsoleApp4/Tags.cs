@@ -2,6 +2,7 @@
     internal class HtmlTags
     {
         public static string[] Tags { get; } = {
+            "body",
             "p",
             "span",
             "a",
@@ -24,8 +25,7 @@
             "area",
             "article",
             "aside",
-            "audio",
-            "body",
+            "audio",            
             "button",
             "canvas",
             "caption",

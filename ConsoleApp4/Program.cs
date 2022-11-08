@@ -2,20 +2,31 @@
 using ConsoleApp4;
 using System.Text.RegularExpressions;
 
+string html = File.ReadAllText("test.txt");
 
+html = html.Replace("'", "\"");
 
-string pattern = @"<body(>|.*)>((.|\n)*)</body>";
-// Create a Regex  
-Regex rg = new(pattern);
+string patternLowerCase = @"<body(>|.*)>((.|\n)*)</body>";
 
-// Long string  
-string authors =  File.ReadAllText("test.txt");
+string patternUpperCase = @"<BODY(>|.*)>((.|\n)*)</BODY>";
 
-authors = authors.Replace("3D", "");
-// Get all matches  
-MatchCollection matchedAuthors = rg.Matches(authors);
+var body = "";
 
-var body = matchedAuthors[0].Value.Replace("\r", "").Replace("\n", "");
+Regex rg = new(patternLowerCase);
+
+if (rg.IsMatch(html))
+{
+    var matchedAuthors = rg.Matches(html);
+    body = matchedAuthors[0].Value.Replace("\r", "").Replace("\n", "");
+}
+
+rg = new(patternUpperCase);
+
+if (rg.IsMatch(html))
+{
+    var matchedAuthors = rg.Matches(html);
+    body = matchedAuthors[0].Value.Replace("\r", "").Replace("\n", "");
+}
 
 NewMethod(ref body);
 
@@ -50,9 +61,32 @@ static void NewMethod(ref string bodyMatch)
 
             if (rgCommentClose.IsMatch(bodyMatch))
                 bodyMatch = rgCommentClose.Replace(bodyMatch, "");
-
-
         }
+        foreach (var tag in HtmlTags.Tags.Select(x => x.ToUpper()))
+        {
+            var rgTagWithProperties = new Regex($"<{tag}\\s.+?\">");
+            var rgTagNormal = new Regex($"<{tag}>");
+            var rgTagClosing = new Regex(@$"</{tag}>");
+
+            if (rgTagWithProperties.IsMatch(bodyMatch))
+                bodyMatch = rgTagWithProperties.Replace(bodyMatch, "");
+
+            if (rgTagNormal.IsMatch(bodyMatch))
+                bodyMatch = rgTagNormal.Replace(bodyMatch, "");
+
+            if (rgTagClosing.IsMatch(bodyMatch))
+                bodyMatch = rgTagClosing.Replace(bodyMatch, "");
+
+            var rgCommentOpen = new Regex(@$"<{tag}");
+            var rgCommentClose = new Regex(@$"{tag}>");
+
+            if (rgCommentOpen.IsMatch(bodyMatch))
+                bodyMatch = rgCommentOpen.Replace(bodyMatch, "");
+
+            if (rgCommentClose.IsMatch(bodyMatch))
+                bodyMatch = rgCommentClose.Replace(bodyMatch, "");
+        }
+
         bodyMatch = bodyMatch.TrimStart().TrimEnd();
 
         var rgRemoveExtraWhiteSpaces = new Regex(@"(\s{2,})");
