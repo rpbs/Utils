@@ -2,7 +2,7 @@
 using ConsoleApp4;
 using System.Text.RegularExpressions;
 
-string html = File.ReadAllText("test.txt");
+string html = File.ReadAllText("test1.txt");
 
 html = html.Replace("'", "\"");
 
@@ -53,8 +53,8 @@ static void NewMethod(ref string bodyMatch)
             if (rgTagClosing.IsMatch(bodyMatch))            
                 bodyMatch = rgTagClosing.Replace(bodyMatch, "");
 
-            var rgCommentOpen = new Regex(@$"<{tag}");
-            var rgCommentClose = new Regex(@$"{tag}>");
+            var rgCommentOpen = new Regex(@$"<!--");
+            var rgCommentClose = new Regex(@$"-->");
 
             if (rgCommentOpen.IsMatch(bodyMatch))
                 bodyMatch = rgCommentOpen.Replace(bodyMatch, "");
