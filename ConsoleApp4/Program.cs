@@ -1,7 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using ConsoleApp4;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 
 string html = File.ReadAllText("test.txt");
@@ -22,35 +20,12 @@ var trimed = html.TrimStart().TrimEnd();
 static void NewMethod(ref string bodyMatch)
 {
     var matches = new List<MatchCollection>();
-    var content = new List<string>();
+    var allMatchTags = new List<string>();
 
     if (bodyMatch is not null)
     {
-        foreach (var tag in HtmlTags.ContainerTags)
-        {
-            // <p\s.+?\">.+?<\/p>
-            var pattern = @$"<{tag}\s.+?>.+?<\/{tag}>";
-            var rgTagWithProperties = new Regex(pattern);
-            var rgTagNormal = new Regex(@$"<{tag}>.+?<\/{tag}>");
-
-            if (rgTagWithProperties.IsMatch(bodyMatch))
-                matches.Add(rgTagWithProperties.Matches(bodyMatch));
-
-            if (rgTagNormal.IsMatch(bodyMatch))
-                matches.Add(rgTagNormal.Matches(bodyMatch));
-
-        }
-        foreach (var tag in HtmlTags.ContainerTags.Select(x => x.ToUpper()))
-        {
-            var rgTagWithProperties = new Regex($"<{tag}\\s.+?\"><//{tag}>");
-            var rgTagNormal = new Regex($"<{tag}><//{tag}>");
-
-            if (rgTagWithProperties.IsMatch(bodyMatch))
-                matches.Add(rgTagWithProperties.Matches(bodyMatch));
-
-            if (rgTagNormal.IsMatch(bodyMatch))
-                matches.Add(rgTagNormal.Matches(bodyMatch));
-        }
+        CaptureTags(bodyMatch, allMatchTags, HtmlTags.ContainerTags);
+        CaptureTags(bodyMatch, allMatchTags, HtmlTags.ContainerTags.Select(x => x.ToUpper()).ToArray());
 
         RemoveTags(ref matches);
 
@@ -72,6 +47,35 @@ static void NewMethod(ref string bodyMatch)
         var rgRemoveExtraWhiteSpaces = new Regex(@"(\s{2,})");
         if (rgRemoveExtraWhiteSpaces.IsMatch(bodyMatch))
             bodyMatch = rgRemoveExtraWhiteSpaces.Replace(bodyMatch, " ");
+    }
+
+    static void CaptureTags(string bodyMatch, List<string> allMatchTags, string[] containerTags)
+    {
+        foreach (var tag in HtmlTags.ContainerTags)
+        {
+            // <p\s.+?\">.+?<\/p>
+            var pattern = @$"<{tag}\s.+?>.+?<\/{tag}>";
+            var rgTagWithProperties = new Regex(pattern);
+            var rgTagNormal = new Regex(@$"<{tag}>.+?<\/{tag}>");
+
+            if (rgTagWithProperties.IsMatch(bodyMatch))
+            {
+                allMatchTags.AddRange(
+                    rgTagWithProperties
+                    .Matches(bodyMatch)
+                    .Select(x => x.Value).ToList());
+            }
+
+
+            if (rgTagNormal.IsMatch(bodyMatch))
+            {
+                allMatchTags.AddRange(
+                    rgTagNormal
+                    .Matches(bodyMatch)
+                    .Select(x => x.Value).ToList());
+            }
+
+        }
     }
 }
 
