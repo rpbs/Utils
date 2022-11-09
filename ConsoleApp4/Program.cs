@@ -22,25 +22,16 @@ static void NewMethod(ref string bodyMatch)
     var matches = new List<MatchCollection>();
     var allMatchTags = new List<string>();
 
+    var tags = HtmlTags.ContainerTags;
+    var upperCase = HtmlTags.ContainerTags.Select(x => x.ToUpper()).ToArray();
+
     if (bodyMatch is not null)
     {
-        CaptureTags(bodyMatch, allMatchTags, HtmlTags.ContainerTags);
-        CaptureTags(bodyMatch, allMatchTags, HtmlTags.ContainerTags.Select(x => x.ToUpper()).ToArray());
+        CaptureTags(bodyMatch, ref allMatchTags, tags);
+        CaptureTags(bodyMatch, ref allMatchTags, upperCase);
 
-        RemoveTags(ref matches);
-
-        var contentx = new List<string>();
-
-        foreach (var matchs in matches)
-        {
-            foreach (var collection in matches)
-            {
-                foreach (var tag in HtmlTags.ContainerTags)
-                {
-                    var plaiText = GetPlainText(tag);
-                }
-            }
-        }
+        ExtractValueFromTags(ref allMatchTags, tags);
+        ExtractValueFromTags(ref allMatchTags, upperCase);       
 
         bodyMatch = bodyMatch.TrimStart().TrimEnd();
 
@@ -49,7 +40,7 @@ static void NewMethod(ref string bodyMatch)
             bodyMatch = rgRemoveExtraWhiteSpaces.Replace(bodyMatch, " ");
     }
 
-    static void CaptureTags(string bodyMatch, List<string> allMatchTags, string[] containerTags)
+    static void CaptureTags(string bodyMatch, ref List<string> allMatchTags, string[] containerTags)
     {
         foreach (var tag in HtmlTags.ContainerTags)
         {
@@ -79,58 +70,82 @@ static void NewMethod(ref string bodyMatch)
     }
 }
 
+static void ExtractValueFromTags(ref List<string> allMatchTags, string[] tags)
+{
+    foreach (var tag in tags)
+    {
+        for (int i = 0; i < allMatchTags.Count; i++)
+        {
+            var tagContent = allMatchTags[i];
+            var pattern = @$"<{tag}\s.+?>";
+            var rg = new Regex(pattern);
+            if (rg.IsMatch(tagContent))
+            {
+                tagContent = rg.Replace(tagContent, "");
+            }
+            pattern = @$"<\/{tag}>";
+            rg = new Regex(pattern);
+            if (rg.IsMatch(tagContent))
+            {
+                tagContent = rg.Replace(tagContent, "");
+            }
+            allMatchTags[i] = tagContent;
+        };
+    }
+}
+/*
 static void RemoveTags(ref List<MatchCollection> matches)
 {
 
-    var totalMatchs = 0;
-    foreach (var matchs in matches)
-    {
-        foreach (var collection in matches)
-        {
-            foreach (var tag in HtmlTags.ContainerTags)
-            {
-                foreach (Match tags in collection)
-                {
-                    var tagUpper = tag.ToUpper();
+   var totalMatchs = 0;
+   foreach (var matchs in matches)
+   {
+       foreach (var collection in matches)
+       {
+           foreach (var tag in HtmlTags.ContainerTags)
+           {
+               foreach (Match tags in collection)
+               {
+                   var tagUpper = tag.ToUpper();
 
-                    var pattern = @$"<{tag}\s.+?>";
-                    var patternUpper = @$"<{tagUpper}\s.+?>";
-                    var rg = new Regex(pattern);
-                    var rgUpper = new Regex(pattern);
-                    string replaced = null;
-                    // 
-                    if (rg.IsMatch(tags.Value) || rgUpper.IsMatch(tags.Value))
-                    {
-                        replaced = rg.Replace(tags.Value, "");
-                        RemoveTags(matches)
-                    }
+                   var pattern = @$"<{tag}\s.+?>";
+                   var patternUpper = @$"<{tagUpper}\s.+?>";
+                   var rg = new Regex(pattern);
+                   var rgUpper = new Regex(pattern);
+                   string replaced = null;
+                   // 
+                   if (rg.IsMatch(tags.Value) || rgUpper.IsMatch(tags.Value))
+                   {
+                       replaced = rg.Replace(tags.Value, "");
+                       RemoveTags(matches);
+                   }
 
-                    pattern = @$"<\/{tag}>";
-                    patternUpper = @$"<\/{tagUpper}>";
+                   pattern = @$"<\/{tag}>";
+                   patternUpper = @$"<\/{tagUpper}>";
 
-                    rg = new Regex(pattern);
-                    rgUpper = new Regex(patternUpper);
-                    if (replaced is not null && rg.IsMatch(replaced) && rgUpper.IsMatch(replaced))
-                    {
-                        replaced = rg.Replace(replaced, "");
-                    }
+                   rg = new Regex(pattern);
+                   rgUpper = new Regex(patternUpper);
+                   if (replaced is not null && rg.IsMatch(replaced) && rgUpper.IsMatch(replaced))
+                   {
+                       replaced = rg.Replace(replaced, "");
+                   }
 
-                    if (replaced is not null) { 
-                        content.Add(replaced);
-                        totalMatchs++;
-                    }
+                   if (replaced is not null) { 
+                       content.Add(replaced);
+                       totalMatchs++;
+                   }
 
-                    if (totalMatchs > 0)
-                    {
+                   if (totalMatchs > 0)
+                   {
 
-                    }
-                }
-            }
-        }
-    }
+                   }
+               }
+           }
+       }
+   }
 
-    foreach (var item in content)
-    {
-        Console.WriteLine(item);
-    }
-}
+   foreach (var item in content)
+   {
+       Console.WriteLine(item);
+   }
+}*/
